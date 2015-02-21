@@ -1,0 +1,272 @@
+---
+title: "Discrete Event Simulation"
+author: "Nicholas Head"
+date: "February 18, 2015"
+layout: default
+---
+
+```{r echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set(fig.path='{{ site.url }}/images/discrete-event-simulation-')
+```
+
+```{r echo=FALSE}
+cumNumberTimeProduct <- 0          # cumulative number-time product
+queueSizeTs <- 0         # plot instantaneous q size
+timeDeltaTs <- 0         # plot time delta
+plotSamples <- 100
+
+LogInstrumentation <- function (simTime, numberInSystem) {
+  if (simTime < plotSamples) { 
+      queueSizeTs <<- append(queueSizeTs,numberInSystem)
+      timeDeltaTs <<- append(timeDeltaTs,simTime) 
+  }
+  return(simTime)
+}
+
+IncrementPopulation <- function (numberInSystem, simTime, lastEventTime, increment=1) {
+  cumNumberTimeProduct <<- cumNumberTimeProduct + numberInSystem * (simTime - lastEventTime)  
+  numberInSystem <- numberInSystem + increment
+  lastEventTime <- LogInstrumentation(simTime, numberInSystem)
+  return (c(numberInSystem, lastEventTime))
+}
+```
+
+###M/M/1 Queue
+
+A single-server queue with a simple birth-death process:
+
+$$\begin{array}{l l}
+    \text{transition} & \quad \text{rate} \\
+    i \rightarrow i + 1 & \quad \lambda & \quad  (i \geq 0) \\
+    i \rightarrow i - 1 & \quad \mu     & \quad  (i \geq 1) \\
+  \end{array} $$
+
+The simulation loop:
+```{r}
+RunSim.MM1 <- function (lambda, mu, simDuration) {
+  simTime <- 0    # sim time
+  timeForNextBirth <- 0         # time for next arrival
+  timeForNextDeath <- simDuration     # time for next departure
+  lastEventTime <- simTime   # tmp var for last event time
+  lastBusyTimeStart <- 0         # tmp var for last busy-time start
+  numberInSystem <- 0          # number in system
+  totalBusyTime <- 0          # total busy time
+  totalCompletions <- 0          # total completions
+  
+  set.seed(1)
+  
+  while (simTime < simDuration) {
+      if (timeForNextBirth < timeForNextDeath) {      # birth
+          simTime <- timeForNextBirth
+          
+          ret = IncrementPopulation(numberInSystem, simTime, lastEventTime) # instrumentation
+          numberInSystem = ret[1]
+          lastEventTime = ret[2]
+          
+          timeForNextBirth <- simTime + rexp(1, lambda)
+          
+          if(numberInSystem == 1) { 
+              lastBusyTimeStart <- simTime
+              timeForNextDeath <- simTime + rexp(1, mu)  # exponential  interarrival period
+          }
+      } else {            # death
+          simTime <- timeForNextDeath
+          
+          ret = IncrementPopulation(numberInSystem, simTime, lastEventTime, -1) # instrumentation
+          numberInSystem = ret[1]
+          lastEventTime = ret[2]
+          totalCompletions <- totalCompletions + 1
+          
+          if (numberInSystem > 0) { 
+              timeForNextDeath <- simTime + rexp(1, mu)  # exponential  service period
+          }
+          else { 
+              timeForNextDeath <- simDuration
+              totalBusyTime <- totalBusyTime + simTime - lastBusyTimeStart
+          }
+      }   
+  }
+  return (c(simTime, totalBusyTime, totalCompletions))
+}
+```
+Kick off the simulation with appropriate parameters:
+
+```{r}
+lambda <- 0.7500188    # birth rate
+mu <- 1.0000    # death rate
+simDuration   <- 10^5 # duration of sim
+
+ret = RunSim.MM1(lambda, mu, simDuration)
+simTime = ret[1]
+totalBusyTime = ret[2]
+totalCompletions = ret[3]
+```
+
+Average busy period: $\frac{1}{\mu - \lambda}$
+```{r}
+1/(mu - lambda)
+```
+
+Average waiting time: $\frac{1}{\mu - \lambda} - \frac{1}{\mu} = \frac{\rho}{\mu - \lambda}$
+```{r}
+1/(mu - lambda) - 1/mu
+```
+
+
+```{r echo=FALSE}
+u <- totalBusyTime/simTime       # utilization B/T
+N <- cumNumberTimeProduct/simTime       # mean queue length (see the Load Average notes)
+x <- totalCompletions/simTime       # mean throughput C/T
+r <- N/x             # mean residence time (from Little's law: Q = XR)
+q <- sum(queueSizeTs)/max(timeDeltaTs) # estimated queue length for plot
+
+library(knitr)
+m <- as.matrix(t(c(u, N, x, r, q)))
+colnames(m) = c("utilization B/T", "mean queue length", "mean throughput C/T", "mean residence time", "estimated queue length ")
+kable(m)
+plot(timeDeltaTs, queueSizeTs, type="s", xlab="Time",ylab="Instantaneous queue length",main="M/M/1 Simulation")
+
+```
+
+We can double check our theoretical results using the 'queueing' package:
+```{r eval=TRUE}
+library(queueing)
+
+## create input parameters
+i_mm1 <- NewInput.MM1(lambda=lambda, mu=mu, n=3)
+## Build the model
+summary(QueueingModel(i_mm1))
+```
+
+
+```{r echo=FALSE, eval=TRUE}
+library(testthat)
+
+epsilon <- 1e-6
+expect_equal(simTime, simDuration) 
+expect_equal(totalBusyTime, 74774.78, tolerance=epsilon)
+expect_equal(cumNumberTimeProduct, 302188.1, tolerance=epsilon)
+expect_equal(u, 0.7477478, tolerance=epsilon)
+expect_equal(N, 3.021881, tolerance=epsilon)
+expect_equal(x, 0.74954, tolerance=epsilon)
+expect_equal(r, 4.031647, tolerance=epsilon)
+```
+
+
+###M/M/C Queue
+
+Now we examine a queueing model with support for $c$ servers:
+
+$$\begin{array}{l l}
+    \text{transition} & \quad \text{rate} \\
+    i \rightarrow i + 1 & \quad \lambda & \quad  (i \geq 0) \\
+    i \rightarrow i - 1 & \quad \mu \text{ min} (i, c)     & \quad  (i \geq 1) \\
+  \end{array} $$
+
+The simulation loop is identical to the version for the M/M/1 queue apart from the modification to the timeToNextDeath reflecting the new transition logic:
+
+```{r eval=FALSE}
+timeForNextDeath <- simTime + rexp(1, min(numberInSystem, c) / mu)
+```
+
+```{r echo=FALSE}
+RunSim.MMC <- function (lambda, mu, c, simDuration) {
+  simTime <- 0    # sim time
+  timeForNextBirth <- 0         # time for next arrival
+  timeForNextDeath <- simDuration     # time for next departure
+  lastEventTime <- simTime   # tmp var for last event time
+  lastBusyTimeStart <- 0         # tmp var for last busy-time start
+  numberInSystem <- 0          # number in system
+  totalBusyTime <- 0          # total busy time
+  totalCompletions <- 0          # total completions
+  
+  set.seed(1)
+  
+  while (simTime < simDuration) {
+      if (timeForNextBirth < timeForNextDeath) {      # birth
+          simTime <- timeForNextBirth
+          
+          ret = IncrementPopulation(numberInSystem, simTime, lastEventTime) # instrumentation
+          numberInSystem = ret[1]
+          lastEventTime = ret[2]
+          
+          timeForNextBirth <- simTime + rexp(1, lambda)
+          
+          if(numberInSystem == 1) { 
+              lastBusyTimeStart <- simTime
+              timeForNextDeath <- simTime + rexp(1, mu)  # exponential  interarrival period
+          }
+      } else {            # death
+          simTime <- timeForNextDeath
+          
+          ret = IncrementPopulation(numberInSystem, simTime, lastEventTime, -1) # instrumentation
+          numberInSystem = ret[1]
+          lastEventTime = ret[2]
+          totalCompletions <- totalCompletions + 1
+          
+          if (numberInSystem > 0) { 
+              timeForNextDeath <- simTime + rexp(1, min(numberInSystem, c) * mu)  # exponential  service period
+          }
+          else { 
+              timeForNextDeath <- simDuration
+              totalBusyTime <- totalBusyTime + simTime - lastBusyTimeStart
+          }
+      }   
+  }
+  return (c(simTime, totalBusyTime, totalCompletions))
+}
+```
+Kick off the simulation with appropriate parameters:
+
+```{r}
+c = 1 # number of servers
+lambda <- 0.7500188    # birth rate
+mu <- 1.0000    # death rate
+simDuration   <- 10^5 # duration of sim
+
+ret = RunSim.MMC(lambda, mu, c, simDuration)
+simTime = ret[1]
+totalBusyTime = ret[2]
+totalCompletions = ret[3]
+```
+
+
+```{r echo=FALSE}
+u <- totalBusyTime/simTime       # utilization B/T
+N <- cumNumberTimeProduct/simTime       # mean queue length (see the Load Average notes)
+x <- totalCompletions/simTime       # mean throughput C/T
+r <- N/x             # mean residence time (from Little's law: Q = XR)
+q <- sum(queueSizeTs)/max(timeDeltaTs) # estimated queue length for plot
+
+library(knitr)
+m <- as.matrix(t(c(u, N, x, r, q)))
+colnames(m) = c("utilization B/T", "mean queue length", "mean throughput C/T", "mean residence time", "estimated queue length ")
+kable(m)
+plot(timeDeltaTs, queueSizeTs, type="s", xlab="Time",ylab="Instantaneous queue length",main="M/M/C Simulation")
+
+```
+
+We can double check our theoretical results using the 'queueing' package:
+```{r eval=TRUE}
+library(queueing)
+
+## create input parameters
+i_mmc <- NewInput.MMC(lambda=lambda, mu=mu, n=3, c = c)
+## Build the model
+summary(QueueingModel(i_mmc))
+```
+
+
+```{r echo=FALSE, eval=FALSE}
+library(testthat)
+
+epsilon <- 1e-6
+expect_equal(simTime, simDuration) 
+expect_equal(totalBusyTime, 74774.78, tolerance=epsilon)
+expect_equal(cumNumberTimeProduct, 302188.1, tolerance=epsilon)
+expect_equal(u, 0.7477478, tolerance=epsilon)
+expect_equal(N, 3.021881, tolerance=epsilon)
+expect_equal(x, 0.74954, tolerance=epsilon)
+expect_equal(r, 4.031647, tolerance=epsilon)
+```
