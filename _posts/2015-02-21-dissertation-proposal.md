@@ -44,38 +44,24 @@ I have managed to successfully get access to NYSE Trade and Quote (TAQ) data fro
 
 The datasets consists of both trade and quote data in the following formats:
 
-\begin{table}[ht]
-\centering
-\begin{tabular}{rllll}
-  \toprule
- & SYMBOL & EX & PRICE & SIZE \\ 
-  \midrule
-2014-03-04 09:30:01.427 & HZO & N & 14.2500 &   915 \\ 
-  2014-03-04 09:30:01.430 & HZO & N & 14.2500 &  1116 \\ 
-  2014-03-04 09:31:23.746 & HZO & D & 14.3920 &   200 \\ 
-  2014-03-04 09:31:23.746 & HZO & D & 14.3960 &   100 \\ 
-  2014-03-04 09:31:23.746 & HZO & D & 14.3980 &   100 \\ 
-  2014-03-04 09:31:23.763 & HZO & D & 14.4000 &   100 \\ 
-   \bottomrule
-\end{tabular}
-\caption{Trade Data Sample for Symbol HZO} 
-\end{table}
-\begin{table}[ht]
-\centering
-\begin{tabular}{rllllll}
-  \toprule
- & SYMBOL & EX & BID & BIDSIZ & OFR & OFRSIZ \\ 
-  \midrule
-2014-03-04 04:00:00.266 & HZO & P &  0.00 &  0 &  0.00 &   0 \\ 
-  2014-03-04 07:39:12.963 & HZO & P &  0.00 &  0 & 18.29 &  18 \\ 
-  2014-03-04 07:39:12.969 & HZO & P &  0.00 &  0 & 16.99 &  10 \\ 
-  2014-03-04 07:39:12.971 & HZO & P & 10.26 & 18 & 16.99 &  10 \\ 
-  2014-03-04 07:39:12.973 & HZO & T & 10.77 &  1 &  0.00 &   0 \\ 
-  2014-03-04 07:39:12.974 & HZO & P & 11.52 & 18 & 16.99 &  10 \\ 
-   \bottomrule
-\end{tabular}
-\caption{Quote Data Sample for Symbol HZO} 
-\end{table}
+
+|SYMBOL |EX |PRICE   |SIZE  |COND |CORR |
+|:------|:--|:-------|:-----|:----|:----|
+|HZO    |N  |14.2500 |  915 |O    |0    |
+|HZO    |N  |14.2500 | 1116 |@    |0    |
+|HZO    |D  |14.3920 |  200 |@    |0    |
+|HZO    |D  |14.3960 |  100 |@    |0    |
+|HZO    |D  |14.3980 |  100 |@    |0    |
+
+
+
+|SYMBOL |EX |BID   |BIDSIZ |OFR   |OFRSIZ |QU_COND |
+|:------|:--|:-----|:------|:-----|:------|:-------|
+|HZO    |P  | 0.00 | 0     | 0.00 |  0    |R       |
+|HZO    |P  | 0.00 | 0     |18.29 | 18    |R       |
+|HZO    |P  | 0.00 | 0     |16.99 | 10    |R       |
+|HZO    |P  |10.26 |18     |16.99 | 10    |R       |
+|HZO    |T  |10.77 | 1     | 0.00 |  0    |R       |
 
 The resolution I have attained access to goes down to millisecond which is both a benefit and a boon. The high frequency data provides an unprecendented view on the microstructure dynamics however also means the shear volume of the data may prove to be computationally very challenging to transmit, store and calculate. As I will outline below, I have made some strides in this area already.   
 

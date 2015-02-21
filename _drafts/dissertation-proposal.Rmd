@@ -88,15 +88,9 @@ I have managed to successfully get access to NYSE Trade and Quote (TAQ) data fro
 The datasets consists of both trade and quote data in the following formats:
 
 ```{r, results='asis', echo=FALSE, message = FALSE, warning=FALSE}
-#library(knitr)
-#kable(head(tdata)[1:5,], caption = "Trade Data Sample for Symbol HZO")
-#kable(head(qdata)[1:5,], caption = "Quote Data Sample for Symbol HZO")
-
-library(xtable)
-options(xtable.comment = FALSE)
-options(xtable.booktabs = TRUE)
-xtable(as.data.frame(head(tdata)[,1:4]), caption = "Trade Data Sample for Symbol HZO")
-xtable(as.data.frame(head(qdata)[,1:6]), caption = "Quote Data Sample for Symbol HZO")
+library(knitr)
+kable(head(tdata)[1:5,], caption = "Trade Data Sample for Symbol HZO")
+kable(head(qdata)[1:5,], caption = "Quote Data Sample for Symbol HZO")
 ```
 
 The resolution I have attained access to goes down to millisecond which is both a benefit and a boon. The high frequency data provides an unprecendented view on the microstructure dynamics however also means the shear volume of the data may prove to be computationally very challenging to transmit, store and calculate. As I will outline below, I have made some strides in this area already.   

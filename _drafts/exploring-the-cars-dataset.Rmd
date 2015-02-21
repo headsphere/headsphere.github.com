@@ -18,6 +18,11 @@ When you click the **Knit** button a document will be generated that includes bo
 summary(cars)
 ```
 
+```{r table} 
+kable(head(iris), style="rmarkdown")
+``` 
+
+TODO: Get this embedded image to work
 ![alt text](images/sequential_trade_model.jpg)
 
 You can also embed plots, for example:
