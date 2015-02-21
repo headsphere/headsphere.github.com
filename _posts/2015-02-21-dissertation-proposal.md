@@ -86,32 +86,32 @@ Once I managed to get access to the TAQ data, the next step was getting it into 
 Once the data had been loaded successfully the next task was running some trade cleanup routines to remove zero prices, limit the observations to a single exchange, filtering by sale condition, and merging any records with the same timestamp
 
 
-```r
+{% highlight r %}
 tdata = tradesCleanup(tdataraw = tdata,exchanges="D", report = FALSE)
-```
+{% endhighlight %}
 
 This was then followed by quote cleanup which was responsible for removing any errant values with abnormally large spreads and outliers where the mid-quote deviated by more than 25 median absolute deviations from a rolling centred median.
 
 
-```r
+{% highlight r %}
 qdata = quotesCleanup(qdataraw = qdata,exchanges="T", report = FALSE, maxi=25) 
 tdataAfterFinalCleanup = tradesCleanupFinal(qdata = qdata, tdata = tdata)
-```
+{% endhighlight %}
 
 Once the trade and quote data was cleaned up the trade and quote data must be matched up using the technique as outlined in Vergote 2005[^vergote05]
 
-```r
+{% highlight r %}
 tqdata = matchTradesQuotes(tdataAfterFinalCleanup,qdata);
-```
+{% endhighlight %}
 
 At this point we are finally ready to plot the data and conduct some initial analysis:
 
 
-```r
+{% highlight r %}
 plot.xts(tqdata[, "PRICE"], type = "bars", main="Trades and Spreads for HZO")
 lines(tqdata[, "OFR"], col="red")
 lines(tqdata[, "BID"], col="green")
-```
+{% endhighlight %}
 
 ![Trades and Spreads for HZO - Cleansed](figure/unnamed-chunk-5-1.png) 
 
@@ -120,38 +120,38 @@ The highfrequency package also provides some liquidity measures which will becom
 The inferred trade direction ($D_t$) is a vector which has values 1 or (-1) if the inferred trade direction is buy or sell respectively. This is based off the Lee and Ready 1991 approach[^lee_ready].
 
 
-```r
+{% highlight r %}
 tradeDirection = getTradeDirection(tqdata)
-```
+{% endhighlight %}
 
 The effective spread can also be calculated as:
 
 $$\mbox{effective spread}_t = 2*D_t*(\mbox{PRICE}_{t} - \frac{(\mbox{BID}_{t}+\mbox{OFR}_{t})}{2}),$$
 
 
-```r
+{% highlight r %}
 effectiveSpread = tqLiquidity(tqdata,type="es")
-```
+{% endhighlight %}
 
 At this point we are ready to set up the inputs to our likelihood calculation, specifically we need the number of buy and sell orders
 
 
-```r
+{% highlight r %}
 tradeDirection = matrix(tradeDirection)
 buy_side = which(tradeDirection > 0)
 num_buy_side = length(buy_side)
 num_sell_side = length(tradeDirection) - num_buy_side
 ntrades = cbind(num_buy_side, num_sell_side)
-```
+{% endhighlight %}
 
 And finally we can run our MLE procedure using the likelihood function provided by the R 'PIN' package[^zagaglia]
 
 
-```r
+{% highlight r %}
 devtools::install_github("cran/PIN")
 init_params = cbind(0.15, 0.05, 0.5, 0.5)
 param_optim = optim(init_params, PIN::pin_likelihood, gr=NULL, ntrades)
-```
+{% endhighlight %}
 
 Which gives us our model's parameter estimates and hence our PIN value
 
@@ -160,7 +160,7 @@ $$PIN = \frac{\alpha \mu}{\alpha \mu + \epsilon_b + \epsilon_s}$$
 \end{marginfigure}
 
 
-```r
+{% highlight r %}
 epsi <- param_optim$par[1]
 miu  <- param_optim$par[2]
 alph <- param_optim$par[3]
@@ -168,11 +168,13 @@ delt <- param_optim$par[4]
 
 pin <- (alph*miu)/(alph*miu + 2*epsi)
 pin
-```
+{% endhighlight %}
 
-```
+
+
+{% highlight text %}
 ## [1] 0.02620556
-```
+{% endhighlight %}
 
 By this result we can see there is a very low probability (2.6%) of the presence of informed traders.
 

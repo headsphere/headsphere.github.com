@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 library(knitr)
 
+render_jekyll(highlight = "pygments")
+
 # Get the filename given as an argument in the shell.
 args = commandArgs(TRUE)
 filename = args[1]
