@@ -6,6 +6,12 @@ layout: default
 ---
 
 
+<<<<<<< HEAD
+=======
+```r
+knitr::opts_chunk$set(fig.path='{{ site.url }}/images/exploring-the-cars-dataset-')
+```
+>>>>>>> c7a35d69b1215197c5663ef17e35709726bb49e3
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
