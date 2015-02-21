@@ -119,7 +119,7 @@ tqdata = matchTradesQuotes(tdataAfterFinalCleanup,qdata);
 
 At this point we are finally ready to plot the data and conduct some initial analysis:
 
-```{r timeseries, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, fig.cap = "Trades and Spreads for HZO - Cleansed", warning=FALSE, message=FALSE}
+```{r timeseries, fig.width = 10, fig.height = 5, fig.fullwidth = TRUE, warning=FALSE, message=FALSE}
 plot.xts(tqdata[, "PRICE"], type = "bars", main="Trades and Spreads for HZO")
 lines(tqdata[, "OFR"], col="red")
 lines(tqdata[, "BID"], col="green")

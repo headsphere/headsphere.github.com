@@ -99,7 +99,7 @@ lines(tqdata[, "OFR"], col="red")
 lines(tqdata[, "BID"], col="green")
 {% endhighlight %}
 
-![Trades and Spreads for HZO - Cleansed]({{ site.url }}/images/disertation-proposal-timeseries-1.png) 
+![center]({{ site.url }}/images/disertation-proposal-timeseries-1.png) 
 
 The highfrequency package also provides some liquidity measures which will become necessary later on
 
