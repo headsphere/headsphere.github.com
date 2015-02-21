@@ -2,7 +2,6 @@
 title: "Cars Test"
 author: "Nick Head"
 date: "21 February 2015"
-layout: default
 ---
 
 
