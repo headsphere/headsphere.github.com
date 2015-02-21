@@ -141,9 +141,7 @@ param_optim = optim(init_params, PIN::pin_likelihood, gr=NULL, ntrades)
 
 Which gives us our model's parameter estimates and hence our PIN value
 
-\begin{marginfigure}
 $$PIN = \frac{\alpha \mu}{\alpha \mu + \epsilon_b + \epsilon_s}$$
-\end{marginfigure}
 
 
 {% highlight r %}
