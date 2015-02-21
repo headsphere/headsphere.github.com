@@ -8,6 +8,8 @@ layout: default
 
 
 
+
+
 #Problem Background
 
 A long-standing problem in the field of market microstructure relates to the information asymmetry that occurs between two parties wishing to buy or sell financial assets. The issue arises when one trader may potentially be in the possession of privileged information about the underlying asset, while the counterparty may only have access to public news and may end up buying an asset with a lower expected value than the efficient price would suggest. This scenario is otherwise known as insider-trading. 
@@ -22,9 +24,7 @@ The model further assumes the number of buy and sell trades to be independent of
 
 $$PIN = \frac{\alpha \mu}{\alpha \mu + \epsilon_b + \epsilon_s}$$
 
-\begin{figure*}
-  \includegraphics{images/sequential_trade_model}
-\end{figure*}
+![alt text](images/sequential_trade_model.jpg)
 
 There have been a variety of criticisms of this model (for instance by Benos and Jochec[^benos07]) that have speculated that the model does not intuitively conform to the theoretical economic realities. For instance one way of testing the efficacy of the PIN statistic is by observing a relationship between it and the bid-ask spread (at times when the PIN is higher, this should lead to a higher spread as market makers attempt to compensate for the increased risk of trading with informed traders). The issue with this approach however is that the positive relationship could actually be caused by something else other than PIN e.g. inventory effects. Furthermore the assumptions related to the information events are unrealistic in the respect that the news events are not necessarily independent across days, nor is the one-event-per-day assumption realistic.
 
@@ -113,7 +113,7 @@ lines(tqdata[, "OFR"], col="red")
 lines(tqdata[, "BID"], col="green")
 {% endhighlight %}
 
-![Trades and Spreads for HZO - Cleansed](figure/unnamed-chunk-5-1.png) 
+![Trades and Spreads for HZO - Cleansed]({{ site.url }}/images/disertation-proposal-timeseries-1.png) 
 
 The highfrequency package also provides some liquidity measures which will become necessary later on
 
