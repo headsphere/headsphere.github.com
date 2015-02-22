@@ -113,6 +113,12 @@ Average waiting time: $\frac{1}{\mu - \lambda} - \frac{1}{\mu} = \frac{\rho}{\mu
 1/(mu - lambda) - 1/mu
 ```
 
+Theoretical traffic intensity: $\rho = \frac{\text{arrival rate}}{\text{service rate}} = \frac{\lambda}{\mu}$
+
+```{r}
+lambda/mu
+```
+
 
 ```{r echo=FALSE}
 u <- totalBusyTime/simTime       # utilization B/T
@@ -123,7 +129,7 @@ q <- sum(queueSizeTs)/max(timeDeltaTs) # estimated queue length for plot
 
 library(knitr)
 m <- as.matrix(t(c(u, N, x, r, q)))
-colnames(m) = c("utilization B/T", "mean queue length", "mean throughput C/T", "mean residence time", "estimated queue length ")
+colnames(m) = c("utilization B/T", "mean queue length", "traffic intensity", "mean residence time", "estimated queue length ")
 kable(m)
 plot(timeDeltaTs, queueSizeTs, type="s", xlab="Time",ylab="Instantaneous queue length",main="M/M/1 Simulation")
 
