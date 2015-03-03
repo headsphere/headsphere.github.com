@@ -121,7 +121,7 @@ lambda/mu
 
 
 ```{r echo=FALSE}
-u <- totalBusyTime/simTime       # utilization B/T
+u <- totalBusyTime/simTime       # traffic intensity
 N <- cumNumberTimeProduct/simTime       # mean queue length (see the Load Average notes)
 x <- totalCompletions/simTime       # mean throughput C/T
 r <- N/x             # mean residence time (from Little's law: Q = XR)
@@ -129,7 +129,7 @@ q <- sum(queueSizeTs)/max(timeDeltaTs) # estimated queue length for plot
 
 library(knitr)
 m <- as.matrix(t(c(u, N, x, r, q)))
-colnames(m) = c("utilization B/T", "mean queue length", "traffic intensity", "mean residence time", "estimated queue length ")
+colnames(m) = c("traffic intensity", "mean queue length", "traffic intensity", "mean residence time", "estimated queue length ")
 kable(m)
 plot(timeDeltaTs, queueSizeTs, type="s", xlab="Time",ylab="Instantaneous queue length",main="M/M/1 Simulation")
 
@@ -226,7 +226,7 @@ RunSim.MMC <- function (lambda, mu, c, simDuration) {
 Kick off the simulation with appropriate parameters:
 
 ```{r}
-c = 1 # number of servers
+c = 3 # number of servers
 lambda <- 0.7500188    # birth rate
 mu <- 1.0000    # death rate
 simDuration   <- 10^5 # duration of sim
@@ -237,9 +237,10 @@ totalBusyTime = ret[2]
 totalCompletions = ret[3]
 ```
 
+NB: I do not think these empirical stats are working properly for the M/M/C model due to limitations in the simulation instrumentation
 
 ```{r echo=FALSE}
-u <- totalBusyTime/simTime       # utilization B/T
+u <- totalBusyTime/simTime       # traffic intensity
 N <- cumNumberTimeProduct/simTime       # mean queue length (see the Load Average notes)
 x <- totalCompletions/simTime       # mean throughput C/T
 r <- N/x             # mean residence time (from Little's law: Q = XR)
@@ -247,7 +248,7 @@ q <- sum(queueSizeTs)/max(timeDeltaTs) # estimated queue length for plot
 
 library(knitr)
 m <- as.matrix(t(c(u, N, x, r, q)))
-colnames(m) = c("utilization B/T", "mean queue length", "mean throughput C/T", "mean residence time", "estimated queue length ")
+colnames(m) = c("traffic intensity", "mean queue length", "mean throughput C/T", "mean residence time", "estimated queue length ")
 kable(m)
 plot(timeDeltaTs, queueSizeTs, type="s", xlab="Time",ylab="Instantaneous queue length",main="M/M/C Simulation")
 

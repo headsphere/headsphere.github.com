@@ -1,0 +1,149 @@
+---
+title: "GGVis Test"
+author: "Nicholas Head"
+date: "November 25, 2014"
+output: html_document
+layout: default
+---
+
+```{r echo=FALSE}
+library(knitr)
+library(ggvis)
+opts_chunk$set(fig.path='{{ site.url }}/images/ggvis-samples-')
+```{r, echo = FALSE, message = FALSE}
+opts_chunk$set(comment = "#>", error = FALSE, tidy = FALSE)
+opts_chunk$set(fig.width = 3.5, fig.height = 2.5, dpi = 100)
+``````
+
+Some little examples from the LondonR GGVis workshop
+
+Obviously the examples here are leagues better than this:
+http://ggvis.rstudio.com/ggvis-basics.html
+
+###The Data
+```{r}
+setwd("~/Documents/RStudioProjects/GGVis")
+tubeData = read.csv("tubeData.csv")
+head(tubeData)
+```
+
+
+###Basics
+```{r results = 'asis'}
+ggvis(tubeData, ~Month, ~Excess)
+```
+
+###Pipe and Dplyr
+```{r}
+require(dplyr)
+
+tubeData %>%
+  group_by(Line) %>% 
+  summarize(mean = mean(Excess))
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points()
+
+```
+
+###Aesthetics
+```{r}
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill = ~Line)
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(size = ~Stations, fill = ~Line)
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill := "red")
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill := "red", opacity:= 0.6)
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill := "red", shape:= "square")
+
+mtcars %>%
+  ggvis(~wt, ~mpg) %>%
+  layer_points(fill = ~cyl, shape:= "triangle")
+
+mtcars %>%
+  ggvis(~wt, ~mpg) %>%
+  layer_points(fill = ~factor(cyl), shape:= "triangle")
+```
+
+###Layers
+```{r}
+
+tubeData %>%
+  ggvis(~Line, ~Excess) %>%
+  layer_boxplots()
+
+mtcars %>%
+  ggvis(~wt, ~mpg) %>%
+  layer_points(fill = ~factor(cyl), shape:= "triangle") %>%
+  layer_smooths()
+
+mtcars %>%
+  ggvis(~wt, ~mpg) %>%
+  layer_points(fill = ~factor(cyl), shape:= "triangle") %>%
+  layer_smooths(stroke := "blue") %>%
+  layer_model_predictions(model = "lm", stroke := "red")
+
+```
+
+###Interactivity
+```{r}
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill = ~Line, fill.hover := "red")
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill = ~Line, 
+               fill.hover := "red", 
+               size.hover := 1000)
+
+tubeData %>%
+  ggvis(~Excess) %>%
+  layer_histograms(fill.hover := "red")
+
+#These won't work in RMarkdown doc, only as part of R session
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill = ~Line, 
+               fill.hover := "red",
+               size.hover := 1000) %>%
+  add_tooltip(function(data) data$Excess)
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill = ~Line, 
+               size := input_slider(10,1000, label = "Size of points"))
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  layer_points(fill = ~Line, 
+               size := input_slider(10,1000, label = "Size of points"),
+               opacity := input_slider(0,1))
+```
+
+#Controlling axis and legends
+```{r}
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  add_axis("x", title = "Month") %>%
+  layer_points(fill = ~Line)
+
+tubeData %>%
+  ggvis(~Month, ~Excess) %>%
+  add_legend(c("fill")) %>%
+  layer_points(fill = ~Line) 
+```
+

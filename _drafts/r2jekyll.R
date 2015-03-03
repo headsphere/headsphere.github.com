@@ -30,5 +30,7 @@ pics = list.files(fromdir, ".png|.jpg")
 pics = sapply(pics, function(x) paste(fromdir, x, sep="/"))
 file.copy(pics, todir, overwrite = TRUE)
 
+unlink("{{ site.url }}", recursive=T)
+
 #http://0.0.0.0:4000/images/exploring-the-cars-dataset-cars-plot-1.png
 #http://0.0.0.0:4000/2015/02/21/exploring-the-cars-dataset/images/sequential_trade_model.jpg
