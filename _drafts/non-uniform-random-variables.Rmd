@@ -1,0 +1,77 @@
+---
+title: "Non-Uniform Random Variables"
+author: "Nick Head"
+date: "3 March 2015"
+layout: default
+---
+
+#Generation of Non-Uniform Random Variables
+
+```{r echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set(fig.path='{{ site.url }}/images/non-uniform-rvs-')
+```
+
+##Inversion Method
+
+For an RV $X$ with a pdf $f$ and cdf $F$ where:
+
+$$F(x) = \int_{-\infty}^x f(t) dt$$
+
+Assuming $F$ has an inverse, we can simulate $X$ by setting $U = F(X)$ via:
+
+$$P(U \leq u) = P[F(X) \leq F(x)] = P[F^{-1}(F(X) \leq F^{-1}(F(x))] = P(X = x)$$
+
+### Exponential Distribution
+
+$$X \sim Exp(\lambda)$$
+
+$$f(x) = \lambda e^{-\lambda x} \quad (x \geq 0)$$
+
+$$F(x) = 1 - e^{-\lambda x} \quad (x \geq 0)$$
+
+$$F^{-1}(u) = - \frac{log(1-u)}{\lambda} = - \frac{log(u)}{\lambda} = x$$
+
+```{r}
+n = 1000
+lambda = 2
+u = runif(n)
+xInv = -log(u)/lambda
+```
+Compare with `rexp`:
+```{r}
+xExp = rexp(n, lambda)
+
+par(mfcol = c(1,2))
+hist(xInv)
+hist(xExp)
+```
+
+### Logistic Distribution
+
+$$X \sim \text{ Logistic}()$$
+
+$$f(x) = \frac{e^{-x}}{(1 + e^{-x})^2}$$
+
+$$F(x) = \frac{1}{(1 + e^{-x})}$$
+
+$$F^{-1}(u) = - log(\frac{1}{u} - 1) = x$$
+
+```{r}
+n = 10000
+u = runif(n)
+xInv = -log(1/u - 1)
+```
+Compare with `rlogis`:
+```{r}
+xLogis = rlogis(n, 0, 1)
+
+par(mfcol = c(1,2))
+hist(xInv)
+hist(xLogis)
+```
+
+
+##Table Lookup Method
+
+##Rejection Method
