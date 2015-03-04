@@ -7,10 +7,7 @@ layout: default
 
 #Generation of Non-Uniform Random Variables
 
-```{r echo=FALSE}
-library(knitr)
-knitr::opts_chunk$set(fig.path='{{ site.url }}/images/non-uniform-rvs-')
-```
+
 
 ##Inversion Method
 
@@ -32,20 +29,24 @@ $$F(x) = 1 - e^{-\lambda x} \quad (x \geq 0)$$
 
 $$F^{-1}(u) = - \frac{log(1-u)}{\lambda} = - \frac{log(u)}{\lambda} = x$$
 
-```{r}
+
+{% highlight r %}
 n = 1000
 lambda = 2
 u = runif(n)
 xInv = -log(u)/lambda
-```
+{% endhighlight %}
 Compare with `rexp`:
-```{r}
+
+{% highlight r %}
 xExp = rexp(n, lambda)
 
 par(mfcol = c(1,2))
 hist(xInv)
 hist(xExp)
-```
+{% endhighlight %}
+
+![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-3-1.png) 
 
 ### Logistic Distribution
 
@@ -57,19 +58,23 @@ $$F(x) = \frac{1}{(1 + e^{-x})}$$
 
 $$F^{-1}(u) = - log(\frac{1}{u} - 1) = x$$
 
-```{r}
+
+{% highlight r %}
 n = 10000
 u = runif(n)
 xInv = -log(1/u - 1)
-```
+{% endhighlight %}
 Compare with `rlogis`:
-```{r}
+
+{% highlight r %}
 xLogis = rlogis(n, 0, 1)
 
 par(mfcol = c(1,2))
 hist(xInv)
 hist(xLogis)
-```
+{% endhighlight %}
+
+![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-5-1.png) 
 
 ##Table Lookup Method
 
@@ -77,65 +82,72 @@ hist(xLogis)
 
 $$X \sim Bin(10,0.3)$$
 
-```{r}
+
+{% highlight r %}
 n <- 10
 p <- .3
 t <- seq(0,n-1)
 prob = pbinom(t,n,p)
-```
+{% endhighlight %}
 
 With a CDF:
-```{r echo=FALSE}
-df = as.data.frame(round(t(prob),4))
-colnames(df) = t
-kable(df)
-```
 
-```{r}
+|      0|      1|      2|      3|      4|      5|      6|      7|      8|  9|
+|------:|------:|------:|------:|------:|------:|------:|------:|------:|--:|
+| 0.0282| 0.1493| 0.3828| 0.6496| 0.8497| 0.9527| 0.9894| 0.9984| 0.9999|  1|
+
+
+{% highlight r %}
 Nsim=10^4; 
 xTable=numeric(Nsim)
 uvec = runif(Nsim)
 xTable = as.numeric(lapply(uvec, function(u){ sum(prob<u)}))
-```
+{% endhighlight %}
 Compare with `rbinom`:
-```{r}
+
+{% highlight r %}
 xBinom = rbinom(Nsim, n, p)
 par(mfcol = c(1,2))
 hist(xTable)
 hist(xBinom)
-```
+{% endhighlight %}
+
+![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-9-1.png) 
 
 ###Poisson Distribution
 
 $$X \sim Poisson(2)$$
 
-```{r}
+
+{% highlight r %}
 lambda=2
 t=seq(0,9)
 prob=ppois(t, lambda)
-```
+{% endhighlight %}
 
 With a CDF:
-```{r echo=FALSE}
-df = as.data.frame(round(t(prob),4))
-colnames(df) = t
-kable(df)
-```
 
-```{r}
+|      0|     1|      2|      3|      4|      5|      6|      7|      8|  9|
+|------:|-----:|------:|------:|------:|------:|------:|------:|------:|--:|
+| 0.1353| 0.406| 0.6767| 0.8571| 0.9473| 0.9834| 0.9955| 0.9989| 0.9998|  1|
+
+
+{% highlight r %}
 Nsim=10^4; 
 xTable=numeric(Nsim)
 uvec = runif(Nsim)
 xTable = as.numeric(lapply(uvec, function(u){ sum(prob<u)}))
-
-```
+{% endhighlight %}
 Compare with `rpois`:
-```{r}
+
+{% highlight r %}
 xPois = rpois(Nsim, lambda)
 par(mfcol = c(1,2))
 hist(xTable)
 hist(xPois)
-```
+{% endhighlight %}
+
+![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-13-1.png) 
 
 
 ##Rejection Method
