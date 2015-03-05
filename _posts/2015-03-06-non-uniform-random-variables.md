@@ -150,4 +150,91 @@ hist(xPois)
 ![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-13-1.png) 
 
 
-##Rejection Method
+##Acceptance-Rejection Method
+
+Simplified Algorithm:
+
+1. Generate $Y \sim g$, $U \sim \mathcal{U}_{[0,1]}$
+
+2. Accept $X = Y$ if $U \leq f(Y)/Mg(y)$
+
+3. Return to 1 otherwise.
+
+In pseudocode this is found by:
+
+
+{% highlight r %}
+> u=runif(1)*M
+> y=randg(1)
+> while (u>f(y)/g(y)){
++   u=runif(1)*M
++   y=randg(1)
++ }
+{% endhighlight %}
+
+In 'production' code this is implemented as follows:
+
+{% highlight r %}
+Simulate <- function(Nsim, f_fn, g_fn, randg_fn) {
+  #M is found by finding the maximum of f(x)/g(x) over [0,1]
+  M = optimize(f=function(x){f_fn(x)/g_fn(x)},interval=c(0,1),maximum=TRUE)$objective
+  
+  #graphing logic
+  ylim <- c(0, 5)
+  xlim <- c(0, 1)
+  curve(f_fn(x),from = 0,to = 1, xlim = xlim, ylim = ylim)
+  par(new=T)
+  
+  x_star = randg_fn(Nsim)
+  y_star = runif(Nsim, max = M * g_fn(x_star)) # y* drawn from proposal function g
+  x = NULL
+  successCount = 0
+  for(i in 1:Nsim){
+    #accept x* if y* <= f(x*)
+    if(y_star[i] <= f_fn(x_star[i])){ 
+      successCount = successCount + 1
+      x[successCount] = x_star[i]
+      
+      #plot the accepted points
+      points(x_star[i], y_star[i], xlab = NA, ylab = NA, xaxt='n', yaxt='n', xlim = xlim, ylim = ylim, col="blue")
+    }
+    else{
+      #plot the rejected points
+      points(x_star[i], y_star[i], xlab = NA, ylab = NA, xaxt='n', yaxt='n', xlim = xlim, ylim = ylim, col="red")
+    }
+  }
+  return(successCount)
+}
+{% endhighlight %}
+
+As an example, $X \sim \mathcal{Be}(2.7, 6.3)$ with a rectangular $Y \sim \mathcal{U}(0,1)$ envelope:
+
+
+{% highlight r %}
+alpha <- 2.7
+beta <- 6.3
+Nsim = 1000
+successCount = Simulate(Nsim, 
+                        f_fn = function (x) {dbeta(x,alpha,beta)},
+                        g_fn = function (y) {dunif(y)},
+                        randg_fn = function (Nsim) {runif(Nsim)})
+{% endhighlight %}
+
+![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-16-1.png) 
+
+Total acceptance rate: 37.6%
+
+To increase the efficiency of the simulation we can increase the acceptance rate by introducing a tighter proposal density (the envelope). For instance try $Y \sim \mathcal{Be}(2,6)$
+
+
+{% highlight r %}
+successCount = Simulate(Nsim, 
+                        f_fn = function (x) {dbeta(x,alpha,beta)},
+                        g_fn = function (y) {dbeta(y,2,6)},
+                        randg_fn = function (Nsim) {rbeta(Nsim, 2, 6)}
+                        )
+{% endhighlight %}
+
+![center]({{ site.url }}/images/non-uniform-rvs-unnamed-chunk-17-1.png) 
+
+Total acceptance rate: 59.2%
